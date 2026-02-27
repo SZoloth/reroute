@@ -1,0 +1,401 @@
+{
+  "project": "Kidnap Button",
+  "branchName": "compound/kidnap-button",
+  "description": "Mobile-first PWA where users press a button and get kidnapped to a random interesting place in their city via Uber/Lyft",
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Initialize Supabase project and install dependencies",
+      "description": "Set up Supabase client library and environment configuration so the app can connect to the database.",
+      "acceptanceCriteria": [
+        "Run `pnpm add @supabase/supabase-js @supabase/ssr` - exits with code 0",
+        "File `src/lib/supabase/client.ts` exists and exports a `createClient` function",
+        "File `src/lib/supabase/server.ts` exists and exports a server-side `createClient` function",
+        "File `.env.local.example` exists with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY placeholders",
+        "File `.gitignore` contains `.env.local`",
+        "Run `pnpm run typecheck` - exits with code 0 (or `npx tsc --noEmit`)"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-002",
+      "title": "Create database schema migration for spots table",
+      "description": "Define the spots table with all required fields for storing curated and community-submitted locations.",
+      "acceptanceCriteria": [
+        "File `supabase/migrations/001_create_spots.sql` exists",
+        "SQL creates `spots` table with columns: id (uuid, PK), name (text, NOT NULL), description (text), category (text, NOT NULL), latitude (double precision, NOT NULL), longitude (double precision, NOT NULL), city (text, NOT NULL), hours (jsonb), tags (text[]), submitted_by (uuid, nullable), upvotes (integer, default 0), status (text, default 'pending', CHECK IN ('approved','pending','rejected')), created_at (timestamptz, default now())",
+        "SQL includes index on `city` and `status` columns",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-003",
+      "title": "Create database schema migration for profiles, trips, and votes tables",
+      "description": "Define the user profiles, trips, and spot_votes tables to support trip logging, ratings, and upvoting.",
+      "acceptanceCriteria": [
+        "File `supabase/migrations/002_create_profiles_trips_votes.sql` exists",
+        "SQL creates `profiles` table: id (uuid, PK, references auth.users), name (text), email (text), avatar_url (text), home_latitude (double precision), home_longitude (double precision), city (text), budget_max (integer, default 0 meaning no limit), is_admin (boolean, default false), created_at (timestamptz)",
+        "SQL creates `trips` table: id (uuid, PK), user_id (uuid, FK to profiles), spot_id (uuid, FK to spots), rating (integer, nullable, CHECK 1-5), notes (text, nullable), is_public (boolean, default true), created_at (timestamptz)",
+        "SQL creates `spot_votes` table: user_id (uuid, FK), spot_id (uuid, FK), created_at (timestamptz), PRIMARY KEY (user_id, spot_id)",
+        "SQL includes index on trips(user_id) and trips(spot_id)",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-004",
+      "title": "Create TypeScript types for database schema",
+      "description": "Define TypeScript types matching the database schema so the app has type-safe data access.",
+      "acceptanceCriteria": [
+        "File `src/lib/types.ts` exists",
+        "Exports `Spot` type with all columns from spots table",
+        "Exports `Profile` type with all columns from profiles table",
+        "Exports `Trip` type with all columns from trips table",
+        "Exports `SpotVote` type with all columns from spot_votes table",
+        "Exports `SpotCategory` union type: 'food' | 'outdoors' | 'culture' | 'nightlife' | 'weird' | 'hidden-gem' | 'historic' | 'activity'",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-005",
+      "title": "Build seed data generation script using Claude API",
+      "description": "Create a Node script that uses the Claude API to generate 50 interesting Denver spots and outputs them as JSON for manual review before database import.",
+      "acceptanceCriteria": [
+        "File `scripts/generate-spots.ts` exists",
+        "Script calls Claude API with a prompt requesting 50 interesting/unique Denver spots with fields: name, description, category, latitude, longitude, hours, tags",
+        "Script outputs results to `scripts/seed-spots.json`",
+        "File `scripts/import-spots.ts` exists and reads from `seed-spots.json`, inserts approved spots into Supabase",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-006",
+      "title": "Set up Supabase Auth with Google OAuth",
+      "description": "Configure authentication so users can sign in with Google. Apple OAuth can be added later.",
+      "acceptanceCriteria": [
+        "File `src/app/auth/callback/route.ts` exists and handles OAuth callback",
+        "File `src/lib/supabase/middleware.ts` exists and refreshes auth session on each request",
+        "File `src/middleware.ts` exists and calls the Supabase middleware helper",
+        "File `src/components/auth/sign-in-button.tsx` exists and triggers Google OAuth sign-in via `supabase.auth.signInWithOAuth({ provider: 'google' })`",
+        "File `src/components/auth/sign-out-button.tsx` exists and calls `supabase.auth.signOut()`",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-007",
+      "title": "Create onboarding flow for home location setup",
+      "description": "After first sign-in, prompt users to set their home location and city so the app can filter spots and estimate ride costs.",
+      "acceptanceCriteria": [
+        "File `src/app/onboarding/page.tsx` exists",
+        "Page requests browser geolocation permission via navigator.geolocation.getCurrentPosition",
+        "On geolocation success, reverse geocodes to city name using Nominatim API (https://nominatim.openstreetmap.org/reverse)",
+        "Displays detected city with option to manually change",
+        "Save button writes home_latitude, home_longitude, city to profiles table",
+        "After save, redirects to home page `/`",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000/onboarding - page loads without console errors"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-008",
+      "title": "Build the Kidnap Button home screen UI",
+      "description": "Create the main home screen with a single dominant button. This is the core of the app — it should feel urgent, fun, and slightly dangerous. Dark theme.",
+      "acceptanceCriteria": [
+        "File `src/app/page.tsx` renders the home screen",
+        "Home screen has dark background (near-black)",
+        "Single large 'Kidnap Me' button centered on screen, taking up significant visual space",
+        "Button has hover/active states with visual feedback",
+        "If user is not authenticated, show sign-in button instead",
+        "If user has no profile/city set, redirect to /onboarding",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000 - page loads with dark background and prominent button visible"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-009",
+      "title": "Build the spot selection API endpoint",
+      "description": "Create a server-side API route that implements the kidnap algorithm: filters spots by city, time, budget, recency, and returns a weighted-random selection.",
+      "acceptanceCriteria": [
+        "File `src/app/api/kidnap/route.ts` exists with POST handler",
+        "Handler requires authenticated user (returns 401 if not)",
+        "Queries spots table filtered by: status = 'approved', city matches user's city",
+        "Filters out spots where current time falls outside spot hours (if hours defined)",
+        "Filters out spots user visited in last 30 days (queries trips table)",
+        "Filters out spots beyond user's budget using haversine distance * $1.50/mile heuristic",
+        "Selects from remaining spots using weighted random (weight = 1 + upvotes)",
+        "Returns selected spot as JSON with 200, or 404 with message if no spots match",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-010",
+      "title": "Build destination reveal screen with animation",
+      "description": "When the button is pressed, show a brief suspense moment then reveal the destination with spot details and ride booking options.",
+      "acceptanceCriteria": [
+        "Pressing 'Kidnap Me' button calls POST /api/kidnap and shows loading/suspense state",
+        "Suspense state lasts 1-2 seconds with animation (pulsing, spinning, or similar)",
+        "After suspense, destination card reveals with: spot name, category badge, short description",
+        "Reveal has entrance animation (slide up, fade in, or scale)",
+        "Two ride buttons shown below destination: 'Uber' and 'Lyft'",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000 - click Kidnap Me button - destination card appears"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-011",
+      "title": "Implement Uber and Lyft deep link generation",
+      "description": "Wire up the ride booking buttons to open Uber and Lyft apps with the destination pre-filled, and create a trip record on click.",
+      "acceptanceCriteria": [
+        "File `src/lib/ride-links.ts` exists",
+        "Exports `getUberDeepLink(lat, lng, name)` returning URL string using uber:// scheme with dropoff coordinates",
+        "Exports `getLyftDeepLink(lat, lng)` returning URL string using lyft:// scheme with destination coordinates",
+        "Exports `getUberWebFallback(lat, lng, name)` returning https://m.uber.com URL for when app not installed",
+        "Exports `getLyftWebFallback(lat, lng)` returning https://www.lyft.com URL for when app not installed",
+        "Clicking Uber/Lyft button creates a trip record via POST to `/api/trips` before opening the deep link",
+        "File `src/app/api/trips/route.ts` exists with POST handler that inserts trip (user_id, spot_id, created_at)",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-012",
+      "title": "Build budget settings screen with slider",
+      "description": "Create a settings page where users can set their maximum ride budget, which filters spot selection.",
+      "acceptanceCriteria": [
+        "File `src/app/settings/page.tsx` exists",
+        "Page shows a range slider from $5 to $50 with a 'No limit' option",
+        "Current budget value displayed above slider",
+        "Changing slider updates profile.budget_max in Supabase via API call",
+        "Settings page accessible from bottom navigation",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000/settings - slider element visible and interactive"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-013",
+      "title": "Build trip history page with rating and notes",
+      "description": "Create the 'My Trips' page showing a chronological adventure log where users can rate trips and add notes.",
+      "acceptanceCriteria": [
+        "File `src/app/trips/page.tsx` exists",
+        "Page fetches user's trips from Supabase joined with spots table, ordered by created_at DESC",
+        "Each trip card shows: spot name, category badge, date (relative like '3 days ago'), star rating (if set)",
+        "Tapping a trip expands to show: spot description, notes field, rating selector",
+        "Star rating component allows setting 1-5 stars, saves via PATCH to `/api/trips/[id]`",
+        "Notes textarea saves on blur via PATCH to `/api/trips/[id]`",
+        "File `src/app/api/trips/[id]/route.ts` exists with PATCH handler for rating and notes",
+        "Trip count shown at top of page ('Kidnapped X times')",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000/trips - page loads without console errors"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-014",
+      "title": "Build spot submission form",
+      "description": "Create a form where users can submit interesting places they know about for community review.",
+      "acceptanceCriteria": [
+        "File `src/app/submit/page.tsx` exists",
+        "Form fields: name (text input), description (textarea), category (dropdown with 8 categories), address (text input), hours (simplified time picker or text), tags (comma-separated text input)",
+        "Address field geocodes to lat/lng using Nominatim API on form submit",
+        "Submit creates a spot with status='pending' and submitted_by=current user ID via POST to `/api/spots`",
+        "File `src/app/api/spots/route.ts` exists with POST handler",
+        "Success state shows confirmation message ('Spot submitted for review!')",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000/submit - form renders with all fields"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-015",
+      "title": "Build admin moderation dashboard",
+      "description": "Create a protected admin page to approve or reject community-submitted spots.",
+      "acceptanceCriteria": [
+        "File `src/app/admin/page.tsx` exists",
+        "Route is protected: redirects to / if user profile.is_admin is false",
+        "Page fetches spots where status='pending', ordered by created_at ASC",
+        "Each pending spot shows: name, description, category, submitted_by user name, map preview or lat/lng",
+        "Approve button sets spot status to 'approved' via PATCH `/api/spots/[id]`",
+        "Reject button sets spot status to 'rejected' via PATCH `/api/spots/[id]`",
+        "File `src/app/api/spots/[id]/route.ts` exists with PATCH handler (admin-only check)",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000/admin - page loads (verify with admin user)"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-016",
+      "title": "Implement spot upvoting with weighted selection",
+      "description": "Add upvote/downvote toggle to spots and update the kidnap algorithm to weight selection by upvote count.",
+      "acceptanceCriteria": [
+        "File `src/components/upvote-button.tsx` exists",
+        "Component shows upvote count and filled/unfilled state based on whether current user has voted",
+        "Clicking toggles vote: POST `/api/spots/[id]/vote` inserts or deletes from spot_votes, updates spots.upvotes count",
+        "File `src/app/api/spots/[id]/vote/route.ts` exists with POST handler",
+        "Upvote button appears on trip detail (expanded trip card) and on feed items",
+        "Verify T-009 kidnap algorithm already uses upvotes for weighted random (weight = 1 + upvotes)",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-017",
+      "title": "Build public feed page showing recent kidnaps",
+      "description": "Create the social feed showing where other users in the same city got kidnapped recently.",
+      "acceptanceCriteria": [
+        "File `src/app/feed/page.tsx` exists",
+        "Page fetches recent public trips (is_public=true) in user's city, joined with spots and profiles, ordered by created_at DESC, limited to 50",
+        "Each feed item shows: user avatar + name, spot name, category badge, relative time ('2h ago'), star rating if set, notes if present",
+        "Feed items link to spot detail or expand inline",
+        "Empty state shows friendly message if no trips in the city yet",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000/feed - page loads without console errors"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-018",
+      "title": "Add trip privacy toggle (public/private)",
+      "description": "Let users control whether their trips appear on the public feed.",
+      "acceptanceCriteria": [
+        "Trip detail (expanded card on /trips) shows a toggle switch for public/private",
+        "Toggle updates trip.is_public via PATCH `/api/trips/[id]`",
+        "Default value for new trips is is_public=true",
+        "Private trips do not appear in /feed queries",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-019",
+      "title": "Build bottom navigation bar",
+      "description": "Create a persistent bottom nav for mobile-first navigation between the main sections of the app.",
+      "acceptanceCriteria": [
+        "File `src/components/bottom-nav.tsx` exists",
+        "Nav bar fixed to bottom of viewport with 4 tabs: Home (button icon), Feed (people icon), Trips (list icon), Settings (gear icon)",
+        "Active tab visually highlighted",
+        "Nav uses Next.js Link for client-side navigation",
+        "Nav included in root layout, visible on all authenticated pages",
+        "Nav hidden on /onboarding and /admin pages",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000 - bottom nav visible with 4 tabs"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-020",
+      "title": "Configure PWA manifest and service worker",
+      "description": "Make the app installable as a PWA with proper manifest, icons, and offline shell support.",
+      "acceptanceCriteria": [
+        "File `public/manifest.json` exists with: name='Kidnap', short_name='Kidnap', start_url='/', display='standalone', background_color (dark), theme_color, icons array with 192x192 and 512x512 sizes",
+        "File `src/app/layout.tsx` includes <link rel='manifest' href='/manifest.json'>",
+        "File `src/app/layout.tsx` includes <meta name='theme-color'> and <meta name='apple-mobile-web-app-capable'>",
+        "Service worker registered that caches app shell for offline loading (using next-pwa or manual SW)",
+        "Run `pnpm run build` - exits with code 0",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-021",
+      "title": "Build location detection utility with manual override",
+      "description": "Create a reusable geolocation utility that detects user's city and allows manual override in settings.",
+      "acceptanceCriteria": [
+        "File `src/lib/geolocation.ts` exists",
+        "Exports `getCurrentPosition()` that wraps navigator.geolocation.getCurrentPosition in a Promise",
+        "Exports `reverseGeocode(lat, lng)` that calls Nominatim API and returns city name",
+        "Exports `calculateDistance(lat1, lng1, lat2, lng2)` using haversine formula, returns miles",
+        "Exports `estimateRideCost(distanceMiles)` returning distanceMiles * 1.5 (dollars)",
+        "Settings page (/settings) includes a city text input that updates profile.city in Supabase",
+        "Run `pnpm run typecheck` - exits with code 0"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-022",
+      "title": "Add user profile page with trip stats",
+      "description": "Create a profile page showing user info and adventure stats.",
+      "acceptanceCriteria": [
+        "File `src/app/profile/page.tsx` exists",
+        "Shows user avatar, name, city",
+        "Shows trip count ('Kidnapped X times')",
+        "Shows list of user's pending submitted spots (status='pending')",
+        "Sign out button at bottom of page",
+        "Accessible from settings page or nav",
+        "Run `pnpm run typecheck` - exits with code 0",
+        "agent-browser: open http://localhost:3000/profile - page loads without console errors"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "T-023",
+      "title": "End-to-end smoke test of the full kidnap loop",
+      "description": "Verify the complete user flow works: sign in → press button → see destination → tap ride link → trip appears in history.",
+      "acceptanceCriteria": [
+        "agent-browser: open http://localhost:3000 - home page loads with dark theme",
+        "agent-browser: Kidnap Me button visible and clickable",
+        "agent-browser: click Kidnap Me - suspense animation appears, then destination card reveals",
+        "agent-browser: destination card shows spot name, category, description",
+        "agent-browser: Uber and Lyft buttons visible on destination card",
+        "agent-browser: open http://localhost:3000/trips - new trip appears in list",
+        "agent-browser: console shows no errors throughout flow",
+        "Run `pnpm run build` - exits with code 0"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
