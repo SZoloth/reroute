@@ -1,6 +1,6 @@
-# Kidnap Button
+# reroute button
 
-Mobile-first PWA where users press a button and get "kidnapped" to a random interesting place in their city via Uber/Lyft.
+Mobile-first PWA where users press a button and get "rerouted" to a random interesting place in their city via Uber/Lyft.
 
 ## Stack
 - Next.js 16 (App Router) + TypeScript
@@ -10,14 +10,14 @@ Mobile-first PWA where users press a button and get "kidnapped" to a random inte
 - PWA (installable, offline shell)
 
 ## Key Concepts
-- **The Button**: Single full-screen "Kidnap Me" button on home screen. Zero friction.
-- **Kidnap Algorithm**: Weighted random selection filtered by city, time-awareness, budget, recency (not visited in 30 days). Weight = 1 + upvotes.
+- **The Button**: Single full-screen "reroute me" button on home screen. Zero friction.
+- **reroute algorithm**: Weighted random selection filtered by city, time-awareness, budget, recency (not visited in 30 days). Weight = 1 + upvotes.
 - **Ride Deep Links**: Uber + Lyft URL schemes, no API key needed. Web fallbacks for users without apps installed.
 - **Budget Heuristic**: $1.50/mile straight-line distance. No real Uber pricing API.
 - **Spot Pipeline**: Claude API generates seed spots → JSON → manual review → import to Supabase.
 
 ## Project Structure
-- `tasks/prd-kidnap-button.md` — full PRD
+- `tasks/prd-reroute-button.md` — full PRD
 - `tasks/prd.json` — 23 execution tasks ordered by dependency
 - `scripts/` — seed data generation and import scripts (TBD)
 - `supabase/migrations/` — database schema (TBD)

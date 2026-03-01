@@ -2,7 +2,7 @@
 
 ## Architecture
 - Keep route handlers dependency-injected where possible (`create*Handler`) so route behavior can be tested without Supabase wiring.
-- Pure domain logic (`selectKidnapSpot`, `buildKidnapContextForUser`) should remain framework-agnostic and easy to test.
+- Pure domain logic (`selectRerouteSpot`, `buildRerouteContextForUser`) should remain framework-agnostic and easy to test.
 
 ## Next.js 16
 - Use `proxy.ts` instead of `middleware.ts` to avoid deprecation warnings.

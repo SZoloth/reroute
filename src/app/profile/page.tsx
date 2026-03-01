@@ -33,7 +33,7 @@ export default async function ProfilePage() {
     <main className="mx-auto w-full max-w-md px-6 py-10 text-zinc-100">
       <h1 className="text-3xl font-semibold">{profile?.name ?? user.email ?? "Profile"}</h1>
       <p className="mt-1 text-sm text-zinc-400">{profile?.city ?? "No city set"}</p>
-      <p className="mt-3 text-sm text-zinc-300">Kidnapped {count ?? 0} times</p>
+      <p className="mt-3 text-sm text-zinc-300">rerouted {count ?? 0} times</p>
 
       <section className="mt-6">
         <h2 className="text-sm uppercase tracking-[0.12em] text-zinc-500">Pending Spots</h2>

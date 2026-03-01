@@ -1,7 +1,7 @@
 import { createClient } from "../supabase/server";
-import type { KidnapInput, Spot } from "./selector";
+import type { RerouteInput, Spot } from "./selector";
 
-export type KidnapContext = Omit<KidnapInput, "now" | "rng">;
+export type RerouteContext = Omit<RerouteInput, "now" | "rng">;
 
 type ProfileRecord = {
   id: string;
@@ -28,7 +28,7 @@ type SpotRecord = {
   hours: Spot["hours"] | null;
 };
 
-export type KidnapRepository = {
+export type RerouteRepository = {
   getProfile: (userId: string) => Promise<{
     id: string;
     city: string;
@@ -43,11 +43,11 @@ export type KidnapRepository = {
   getApprovedSpotsByCity: (city: string) => Promise<Spot[]>;
 };
 
-export async function buildKidnapContextForUser(params: {
+export async function buildRerouteContextForUser(params: {
   userId: string;
   now: Date;
-  repository: KidnapRepository;
-}): Promise<KidnapContext | null> {
+  repository: RerouteRepository;
+}): Promise<RerouteContext | null> {
   const profile = await params.repository.getProfile(params.userId);
   if (!profile) {
     return null;
@@ -72,12 +72,12 @@ export async function buildKidnapContextForUser(params: {
   };
 }
 
-export async function getKidnapContextForUser(
+export async function getRerouteContextForUser(
   userId: string,
-): Promise<KidnapContext | null> {
+): Promise<RerouteContext | null> {
   try {
-    const repo = await createSupabaseKidnapRepository();
-    return buildKidnapContextForUser({
+    const repo = await createSupabaseRerouteRepository();
+    return buildRerouteContextForUser({
       userId,
       now: new Date(),
       repository: repo,
@@ -87,7 +87,7 @@ export async function getKidnapContextForUser(
   }
 }
 
-async function createSupabaseKidnapRepository(): Promise<KidnapRepository> {
+async function createSupabaseRerouteRepository(): Promise<RerouteRepository> {
   const supabase = await createClient();
 
   return {

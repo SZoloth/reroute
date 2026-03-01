@@ -1,4 +1,4 @@
--- RLS + policies for Kidnap v1
+-- RLS + policies for reroute v1
 
 -- helper
 create or replace function public.is_admin(user_id uuid)
@@ -25,7 +25,7 @@ create policy "profiles_select_authenticated"
 on public.profiles
 for select
 to authenticated
-using (true);
+using (id = auth.uid());
 
 create policy "profiles_insert_own"
 on public.profiles

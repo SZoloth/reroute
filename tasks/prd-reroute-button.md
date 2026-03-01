@@ -1,8 +1,8 @@
-# PRD: Kidnap Button
+# PRD: reroute button
 
 ## Introduction
 
-A mobile-first PWA where bored people press a single button and get "kidnapped" to a random interesting place in their city. The app picks a surprise destination, opens Uber or Lyft with the destination pre-filled, and logs the trip. Users can rate spots, submit new ones, and see where others got kidnapped.
+A mobile-first PWA where bored people press a single button and get "rerouted" to a random interesting place in their city. The app picks a surprise destination, opens Uber or Lyft with the destination pre-filled, and logs the trip. Users can rate spots, submit new ones, and see where others got rerouted.
 
 The core insight: it removes decision paralysis. It's not "where should I go?" — it's "you're going. get in."
 
@@ -50,11 +50,11 @@ Inspired by a viral project where someone wired a physical Raspberry Pi button t
 - [ ] Session persists across browser refreshes
 - [ ] Typecheck/lint passes
 
-### US-003: The Kidnap Button
+### US-003: The reroute button
 **Description:** As a user, I want to press a single big button and immediately get a random interesting destination so I stop overthinking and just go.
 
 **Acceptance Criteria:**
-- [ ] Home screen is dominated by a single large "Kidnap Me" button
+- [ ] Home screen is dominated by a single large "reroute me" button
 - [ ] Pressing it selects a random approved spot in the user's city
 - [ ] Selection is time-aware: filters out spots that are closed or inappropriate for current time of day
 - [ ] Selection excludes spots the user has visited in the last 30 days
@@ -88,7 +88,7 @@ Inspired by a viral project where someone wired a physical Raspberry Pi button t
 - [ ] Verify in browser using dev-browser skill
 
 ### US-006: Trip history and ratings
-**Description:** As a user, I want to see everywhere I've been kidnapped and rate each trip so I can track my adventures.
+**Description:** As a user, I want to see everywhere I've been rerouted and rate each trip so I can track my adventures.
 
 **Acceptance Criteria:**
 - [ ] "My Trips" tab showing chronological list of past trips
@@ -96,7 +96,7 @@ Inspired by a viral project where someone wired a physical Raspberry Pi button t
 - [ ] Tap a trip to expand: see spot description, your notes, your rating
 - [ ] 1-5 star rating system, settable after the trip
 - [ ] Optional text notes field per trip
-- [ ] Trip count displayed on profile ("Kidnapped 11 times")
+- [ ] Trip count displayed on profile ("rerouted 11 times")
 - [ ] Typecheck/lint passes
 - [ ] Verify in browser using dev-browser skill
 
@@ -132,17 +132,17 @@ Inspired by a viral project where someone wired a physical Raspberry Pi button t
 - [ ] Users can also upvote from the public feed
 - [ ] One upvote per user per spot (toggle on/off)
 - [ ] Upvote count visible on spot cards
-- [ ] Higher-upvoted spots have a higher probability of being selected by the kidnap algorithm
+- [ ] Higher-upvoted spots have a higher probability of being selected by the reroute algorithm
 - [ ] Weighting includes a cap to avoid runaway popularity bias
 - [ ] Typecheck/lint passes
 
-### US-010: Public feed — "Kidnap Map"
-**Description:** As a user, I want to see where others got kidnapped so I feel part of a community of adventurers.
+### US-010: Public feed — "reroute Map"
+**Description:** As a user, I want to see where others got rerouted so I feel part of a community of adventurers.
 
 **Acceptance Criteria:**
 - [ ] "Feed" tab showing recent trips from all users in the same city
 - [ ] Each feed item shows: user avatar/name, spot name, category, time ago, rating, notes (if public)
-- [ ] Optional: map view showing pins of recent kidnaps (deferred to V1.1)
+- [ ] Optional: map view showing pins of recent reroutes (deferred to V1.1)
 - [ ] Users can toggle their trips between public and private (default: public)
 - [ ] Typecheck/lint passes
 - [ ] Verify in browser using dev-browser skill
@@ -151,12 +151,12 @@ Inspired by a viral project where someone wired a physical Raspberry Pi button t
 **Description:** As a user, I want to install the app on my home screen so it feels like a native app.
 
 **Acceptance Criteria:**
-- [ ] Valid web app manifest with app name ("Kidnap"), icons, theme color
+- [ ] Valid web app manifest with app name ("reroute"), icons, theme color
 - [ ] Service worker for offline shell (app loads even without network, shows cached UI)
 - [ ] "Add to Home Screen" prompt appears on supported browsers
 - [ ] Splash screen on launch
 - [ ] Standalone display mode (no browser chrome)
-- [ ] Offline behavior is explicit: home UI and nav load; no new kidnap selection without network
+- [ ] Offline behavior is explicit: home UI and nav load; no new reroute selection without network
 - [ ] Typecheck/lint passes
 - [ ] Verify in browser using dev-browser skill
 
@@ -185,7 +185,7 @@ Inspired by a viral project where someone wired a physical Raspberry Pi button t
 - FR-11: PWA must be installable with offline shell support and clearly defined offline limits
 - FR-12: Seed data pipeline generates spots via Claude API for manual review before import
 - FR-13: Users can report problematic spots; reports are visible in moderation queue
-- FR-14: Re-roll is supported once per kidnap session to preserve surprise while preventing paralysis
+- FR-14: Re-roll is supported once per reroute session to preserve surprise while preventing paralysis
 
 ## Canonical Data Model (V1)
 
@@ -240,7 +240,7 @@ Fallback behavior:
 
 ## Design Considerations
 
-- The button must feel urgent, fun, slightly dangerous — like you're actually getting kidnapped
+- The button must feel urgent, fun, slightly dangerous — like you're actually getting rerouted
 - Dark theme preferred — this is a nightlife-friendly app
 - Minimal UI. The home screen is the button. Everything else is secondary
 - Destination reveal should feel like unwrapping a surprise (animation + short suspense)
@@ -259,7 +259,7 @@ Fallback behavior:
 - **Spot generation:** Claude API for initial seed data, output to JSON for human review
 - **Deployment:** Vercel
 - **PWA:** next-pwa or manual service worker setup
-- **Observability:** basic analytics/events for button press, kidnap success, no-result, ride-click, reroll, and reports
+- **Observability:** basic analytics/events for button press, reroute success, no-result, ride-click, reroll, and reports
 
 ## Success Metrics
 
@@ -268,7 +268,7 @@ Fallback behavior:
 - Users complete the full loop (button press -> ride clicked) in under 15 seconds
 - 70%+ of ride-clicked trips get rated (proxy for engagement)
 - Community submits 10+ spots in first month
-- **No-result rate** (kidnap request with zero eligible spots) < 10%
+- **No-result rate** (reroute request with zero eligible spots) < 10%
 - **Ride click-through rate** (destination reveal -> Uber/Lyft tap) > 35%
 - **Moderation latency** for pending submissions/reports median < 72 hours
 - **Reroll usage rate** < 25% (guardrail against decision paralysis returning)

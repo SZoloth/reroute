@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-test("kidnap reveal and ride-click smoke", async ({ page }) => {
-  let kidnapCalls = 0;
+test("reroute reveal and ride-click smoke", async ({ page }) => {
+  let rerouteCalls = 0;
   let tripCalls = 0;
 
-  await page.route("**/api/kidnap", async (route) => {
-    kidnapCalls += 1;
+  await page.route("**/api/reroute", async (route) => {
+    rerouteCalls += 1;
     const payload =
-      kidnapCalls === 1
+      rerouteCalls === 1
         ? {
             spot: {
               id: "spot-1",
@@ -47,10 +47,10 @@ test("kidnap reveal and ride-click smoke", async ({ page }) => {
 
   await page.goto("/");
 
-  const kidnapButton = page.getByRole("button", { name: "Kidnap me" });
-  await expect(kidnapButton).toBeVisible();
+  const rerouteButton = page.getByRole("button", { name: "reroute me" });
+  await expect(rerouteButton).toBeVisible();
 
-  await kidnapButton.click();
+  await rerouteButton.click();
   await expect(page.getByText("Denver Art Museum")).toBeVisible();
 
   await page.getByRole("button", { name: "Uber" }).click({ force: true });

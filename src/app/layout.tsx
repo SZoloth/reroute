@@ -17,12 +17,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kidnap",
+  title: "reroute",
   description: "One tap to adventure.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    title: "Kidnap",
+    title: "reroute",
     statusBarStyle: "black-translucent",
   },
 };

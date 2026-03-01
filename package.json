@@ -1,5 +1,5 @@
 {
-  "name": "kidnap",
+  "name": "reroute",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -29,6 +29,7 @@
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "agent-browser": "^0.15.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "pngjs": "^7.0.0",

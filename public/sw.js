@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidnap-shell-v1';
+const CACHE_NAME = 'reroute-shell-v1';
 const APP_SHELL = ['/', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
@@ -17,6 +17,14 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
+  const isApiRequest = requestUrl.pathname.startsWith('/api/');
+
+  if (!isSameOrigin || isApiRequest) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {

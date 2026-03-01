@@ -33,10 +33,10 @@ export function HomeClient() {
 
   const buttonLabel = useMemo(() => {
     if (isLoading) return "Choosing…";
-    return "Kidnap Me";
+    return "reroute me";
   }, [isLoading]);
 
-  async function requestKidnap(options?: { isReroll?: boolean; excludeSpotId?: string }) {
+  async function requestReroute(options?: { isReroll?: boolean; excludeSpotId?: string }) {
     const isReroll = options?.isReroll ?? false;
     if (isReroll && rerollDisabled) return;
 
@@ -49,7 +49,7 @@ export function HomeClient() {
 
     try {
       const [response] = await Promise.all([
-        fetch("/api/kidnap", {
+        fetch("/api/reroute", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -113,7 +113,7 @@ export function HomeClient() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(244,63,94,0.16),transparent_42%),radial-gradient(circle_at_85%_90%,rgba(59,130,246,0.12),transparent_38%)]" />
 
         <header className="z-10 flex items-center justify-between px-5 pt-6">
-          <p className="text-xs uppercase tracking-[0.24em] text-zinc-400">Kidnap</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-zinc-400">reroute</p>
           <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500">Denver</p>
         </header>
 
@@ -121,9 +121,9 @@ export function HomeClient() {
           <AnimatePresence mode="wait" initial={false}>
             {!isRevealed ? (
               <motion.button
-                key="kidnap-button"
-                layoutId="kidnap-core"
-                onClick={() => requestKidnap()}
+                key="reroute-button"
+                layoutId="reroute-core"
+                onClick={() => requestReroute()}
                 disabled={isLoading}
                 className="relative h-64 w-64 rounded-full border border-zinc-100/15 bg-zinc-900/70 shadow-[0_0_80px_rgba(244,63,94,0.25)] backdrop-blur disabled:cursor-wait disabled:opacity-80"
                 initial={{ opacity: 0.8, scale: 0.96 }}
@@ -131,7 +131,7 @@ export function HomeClient() {
                 exit={{ opacity: 0.5, scale: 0.9 }}
                 transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: EASE }}
                 whileTap={shouldReduceMotion ? undefined : { scale: 0.95 }}
-                aria-label="Kidnap me"
+                aria-label={buttonLabel}
               >
                 <span className="relative flex h-full w-full items-center justify-center text-3xl font-semibold tracking-tight text-zinc-50">
                   {buttonLabel}
@@ -179,7 +179,7 @@ export function HomeClient() {
 
             <div className="mb-3 flex items-center gap-3">
               <motion.div
-                layoutId="kidnap-core"
+                layoutId="reroute-core"
                 className="h-12 w-12 rounded-full border border-zinc-100/20 bg-zinc-900/80"
                 transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: EASE }}
               />
@@ -208,7 +208,7 @@ export function HomeClient() {
             </div>
 
             <button
-              onClick={() => requestKidnap({ isReroll: true, excludeSpotId: spot?.id })}
+              onClick={() => requestReroute({ isReroll: true, excludeSpotId: spot?.id })}
               disabled={rerollDisabled || isLoading}
               className="mt-3 w-full rounded-xl border border-zinc-800 px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-45"
             >

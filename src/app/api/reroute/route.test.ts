@@ -1,32 +1,32 @@
 import { describe, expect, it } from "vitest";
 
-import { createKidnapPostHandler } from "./route";
+import { createReroutePostHandler, resolveUserIdFromRequest } from "./route";
 
-describe("POST /api/kidnap", () => {
+describe("POST /api/reroute", () => {
   it("returns 401 when request is unauthenticated", async () => {
-    const handler = createKidnapPostHandler({
-      getKidnapContextForUser: async () => null,
+    const handler = createReroutePostHandler({
+      getRerouteContextForUser: async () => null,
       now: () => new Date("2026-02-28T18:00:00.000Z"),
       getUserIdFromRequest: async () => null,
     });
 
     const response = await handler(
-      new Request("http://localhost:3000/api/kidnap", { method: "POST" }),
+      new Request("http://localhost:3000/api/reroute", { method: "POST" }),
     );
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({ error: "Unauthorized" });
   });
 
-  it("returns 404 when user has no eligible kidnap context", async () => {
-    const handler = createKidnapPostHandler({
-      getKidnapContextForUser: async () => null,
+  it("returns 404 when user has no eligible reroute context", async () => {
+    const handler = createReroutePostHandler({
+      getRerouteContextForUser: async () => null,
       now: () => new Date("2026-02-28T18:00:00.000Z"),
       getUserIdFromRequest: async () => "user-1",
     });
 
     const response = await handler(
-      new Request("http://localhost:3000/api/kidnap", { method: "POST" }),
+      new Request("http://localhost:3000/api/reroute", { method: "POST" }),
     );
 
     expect(response.status).toBe(404);
@@ -34,8 +34,8 @@ describe("POST /api/kidnap", () => {
   });
 
   it("returns selected spot when user is authorized and has eligible spots", async () => {
-    const handler = createKidnapPostHandler({
-      getKidnapContextForUser: async () => ({
+    const handler = createReroutePostHandler({
+      getRerouteContextForUser: async () => ({
         user: {
           city: "Denver",
           homeLatitude: 39.7392,
@@ -60,7 +60,7 @@ describe("POST /api/kidnap", () => {
     });
 
     const response = await handler(
-      new Request("http://localhost:3000/api/kidnap", { method: "POST" }),
+      new Request("http://localhost:3000/api/reroute", { method: "POST" }),
     );
 
     expect(response.status).toBe(200);
@@ -72,9 +72,9 @@ describe("POST /api/kidnap", () => {
     });
   });
 
-  it("returns 400 when reroll count exceeds one", async () => {
-    const handler = createKidnapPostHandler({
-      getKidnapContextForUser: async () => ({
+  it("returns 400 when reroll count is outside the allowed range", async () => {
+    const handler = createReroutePostHandler({
+      getRerouteContextForUser: async () => ({
         user: {
           city: "Denver",
           homeLatitude: 39.7392,
@@ -88,22 +88,46 @@ describe("POST /api/kidnap", () => {
       getUserIdFromRequest: async () => "user-1",
     });
 
-    const response = await handler(
-      new Request("http://localhost:3000/api/kidnap", {
+    const tooManyResponse = await handler(
+      new Request("http://localhost:3000/api/reroute", {
         method: "POST",
         body: JSON.stringify({ rerollCount: 2 }),
       }),
     );
 
-    expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
+    expect(tooManyResponse.status).toBe(400);
+    await expect(tooManyResponse.json()).resolves.toEqual({
+      error: "Only one reroll is allowed per session",
+    });
+
+    const negativeResponse = await handler(
+      new Request("http://localhost:3000/api/reroute", {
+        method: "POST",
+        body: JSON.stringify({ rerollCount: -1 }),
+      }),
+    );
+
+    expect(negativeResponse.status).toBe(400);
+    await expect(negativeResponse.json()).resolves.toEqual({
+      error: "Only one reroll is allowed per session",
+    });
+
+    const floatResponse = await handler(
+      new Request("http://localhost:3000/api/reroute", {
+        method: "POST",
+        body: JSON.stringify({ rerollCount: 0.5 }),
+      }),
+    );
+
+    expect(floatResponse.status).toBe(400);
+    await expect(floatResponse.json()).resolves.toEqual({
       error: "Only one reroll is allowed per session",
     });
   });
 
   it("excludes the previous spot id for rerolls", async () => {
-    const handler = createKidnapPostHandler({
-      getKidnapContextForUser: async () => ({
+    const handler = createReroutePostHandler({
+      getRerouteContextForUser: async () => ({
         user: {
           city: "Denver",
           homeLatitude: 39.7392,
@@ -137,7 +161,7 @@ describe("POST /api/kidnap", () => {
     });
 
     const response = await handler(
-      new Request("http://localhost:3000/api/kidnap", {
+      new Request("http://localhost:3000/api/reroute", {
         method: "POST",
         body: JSON.stringify({ excludeSpotId: "spot-1", rerollCount: 1 }),
       }),
@@ -149,5 +173,25 @@ describe("POST /api/kidnap", () => {
         id: "spot-2",
       },
     });
+  });
+
+  it("resolves authenticated user id from auth helper", async () => {
+    const userId = await resolveUserIdFromRequest(
+      new Request("http://localhost:3000/api/reroute", { method: "POST" }),
+      async () => "user-123",
+    );
+
+    expect(userId).toBe("user-123");
+  });
+
+  it("returns null when auth helper throws", async () => {
+    const userId = await resolveUserIdFromRequest(
+      new Request("http://localhost:3000/api/reroute", { method: "POST" }),
+      async () => {
+        throw new Error("auth unavailable");
+      },
+    );
+
+    expect(userId).toBeNull();
   });
 });

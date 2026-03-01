@@ -1,7 +1,7 @@
 {
-  "project": "Kidnap Button",
-  "branchName": "compound/kidnap-button",
-  "description": "Mobile-first PWA where users press a button and get kidnapped to a random interesting place in their city via Uber/Lyft",
+  "project": "reroute button",
+  "branchName": "compound/reroute-button",
+  "description": "Mobile-first PWA where users press a button and get rerouted to a random interesting place in their city via Uber/Lyft",
   "tasks": [
     {
       "id": "T-001",
@@ -117,12 +117,12 @@
     },
     {
       "id": "T-008",
-      "title": "Build the Kidnap Button home screen UI",
+      "title": "Build the reroute button home screen UI",
       "description": "Create the main home screen with a single dominant button. This is the core of the app — it should feel urgent, fun, and slightly dangerous. Dark theme.",
       "acceptanceCriteria": [
         "File `src/app/page.tsx` renders the home screen",
         "Home screen has dark background (near-black)",
-        "Single large 'Kidnap Me' button centered on screen, taking up significant visual space",
+        "Single large 'reroute me' button centered on screen, taking up significant visual space",
         "Button has hover/active states with visual feedback",
         "If user is not authenticated, show sign-in button instead",
         "If user has no profile/city set, redirect to /onboarding",
@@ -136,9 +136,9 @@
     {
       "id": "T-009",
       "title": "Build the spot selection API endpoint",
-      "description": "Create a server-side API route that implements the kidnap algorithm: filters spots by city, time, budget, recency, and returns a weighted-random selection.",
+      "description": "Create a server-side API route that implements the reroute algorithm: filters spots by city, time, budget, recency, and returns a weighted-random selection.",
       "acceptanceCriteria": [
-        "File `src/app/api/kidnap/route.ts` exists with POST handler",
+        "File `src/app/api/reroute/route.ts` exists with POST handler",
         "Handler requires authenticated user (returns 401 if not)",
         "Queries spots table filtered by: status = 'approved', city matches user's city",
         "Filters out spots where current time falls outside spot hours (if hours defined)",
@@ -157,13 +157,13 @@
       "title": "Build destination reveal screen with animation",
       "description": "When the button is pressed, show a brief suspense moment then reveal the destination with spot details and ride booking options.",
       "acceptanceCriteria": [
-        "Pressing 'Kidnap Me' button calls POST /api/kidnap and shows loading/suspense state",
+        "Pressing 'reroute me' button calls POST /api/reroute and shows loading/suspense state",
         "Suspense state lasts 1-2 seconds with animation (pulsing, spinning, or similar)",
         "After suspense, destination card reveals with: spot name, category badge, short description",
         "Reveal has entrance animation (slide up, fade in, or scale)",
         "Two ride buttons shown below destination: 'Uber' and 'Lyft'",
         "Run `pnpm run typecheck` - exits with code 0",
-        "agent-browser: open http://localhost:3000 - click Kidnap Me button - destination card appears"
+        "agent-browser: open http://localhost:3000 - click reroute me button - destination card appears"
       ],
       "priority": 10,
       "passes": false,
@@ -216,7 +216,7 @@
         "Star rating component allows setting 1-5 stars, saves via PATCH to `/api/trips/[id]`",
         "Notes textarea saves on blur via PATCH to `/api/trips/[id]`",
         "File `src/app/api/trips/[id]/route.ts` exists with PATCH handler for rating and notes",
-        "Trip count shown at top of page ('Kidnapped X times')",
+        "Trip count shown at top of page ('rerouted X times')",
         "Run `pnpm run typecheck` - exits with code 0",
         "agent-browser: open http://localhost:3000/trips - page loads without console errors"
       ],
@@ -264,14 +264,14 @@
     {
       "id": "T-016",
       "title": "Implement spot upvoting with weighted selection",
-      "description": "Add upvote/downvote toggle to spots and update the kidnap algorithm to weight selection by upvote count.",
+      "description": "Add upvote/downvote toggle to spots and update the reroute algorithm to weight selection by upvote count.",
       "acceptanceCriteria": [
         "File `src/components/upvote-button.tsx` exists",
         "Component shows upvote count and filled/unfilled state based on whether current user has voted",
         "Clicking toggles vote: POST `/api/spots/[id]/vote` inserts or deletes from spot_votes, updates spots.upvotes count",
         "File `src/app/api/spots/[id]/vote/route.ts` exists with POST handler",
         "Upvote button appears on trip detail (expanded trip card) and on feed items",
-        "Verify T-009 kidnap algorithm already uses upvotes for weighted random (weight = 1 + upvotes)",
+        "Verify T-009 reroute algorithm already uses upvotes for weighted random (weight = 1 + upvotes)",
         "Run `pnpm run typecheck` - exits with code 0"
       ],
       "priority": 16,
@@ -280,8 +280,8 @@
     },
     {
       "id": "T-017",
-      "title": "Build public feed page showing recent kidnaps",
-      "description": "Create the social feed showing where other users in the same city got kidnapped recently.",
+      "title": "Build public feed page showing recent reroutes",
+      "description": "Create the social feed showing where other users in the same city got rerouted recently.",
       "acceptanceCriteria": [
         "File `src/app/feed/page.tsx` exists",
         "Page fetches recent public trips (is_public=true) in user's city, joined with spots and profiles, ordered by created_at DESC, limited to 50",
@@ -333,7 +333,7 @@
       "title": "Configure PWA manifest and service worker",
       "description": "Make the app installable as a PWA with proper manifest, icons, and offline shell support.",
       "acceptanceCriteria": [
-        "File `public/manifest.json` exists with: name='Kidnap', short_name='Kidnap', start_url='/', display='standalone', background_color (dark), theme_color, icons array with 192x192 and 512x512 sizes",
+        "File `public/manifest.json` exists with: name='reroute', short_name='reroute', start_url='/', display='standalone', background_color (dark), theme_color, icons array with 192x192 and 512x512 sizes",
         "File `src/app/layout.tsx` includes <link rel='manifest' href='/manifest.json'>",
         "File `src/app/layout.tsx` includes <meta name='theme-color'> and <meta name='apple-mobile-web-app-capable'>",
         "Service worker registered that caches app shell for offline loading (using next-pwa or manual SW)",
@@ -368,7 +368,7 @@
       "acceptanceCriteria": [
         "File `src/app/profile/page.tsx` exists",
         "Shows user avatar, name, city",
-        "Shows trip count ('Kidnapped X times')",
+        "Shows trip count ('rerouted X times')",
         "Shows list of user's pending submitted spots (status='pending')",
         "Sign out button at bottom of page",
         "Accessible from settings page or nav",
@@ -381,12 +381,12 @@
     },
     {
       "id": "T-023",
-      "title": "End-to-end smoke test of the full kidnap loop",
+      "title": "End-to-end smoke test of the full reroute loop",
       "description": "Verify the complete user flow works: sign in → press button → see destination → tap ride link → trip appears in history.",
       "acceptanceCriteria": [
         "agent-browser: open http://localhost:3000 - home page loads with dark theme",
-        "agent-browser: Kidnap Me button visible and clickable",
-        "agent-browser: click Kidnap Me - suspense animation appears, then destination card reveals",
+        "agent-browser: reroute me button visible and clickable",
+        "agent-browser: click reroute me - suspense animation appears, then destination card reveals",
         "agent-browser: destination card shows spot name, category, description",
         "agent-browser: Uber and Lyft buttons visible on destination card",
         "agent-browser: open http://localhost:3000/trips - new trip appears in list",

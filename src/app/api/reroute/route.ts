@@ -1,42 +1,37 @@
 import {
-  getKidnapContextForUser,
-  type KidnapContext,
-} from "../../../lib/kidnap/context";
+  getRerouteContextForUser,
+  type RerouteContext,
+} from "../../../lib/reroute/context";
 import { getAuthenticatedUserId } from "../../../lib/server/auth";
-import { selectKidnapSpot } from "../../../lib/kidnap/selector";
+import { selectRerouteSpot } from "../../../lib/reroute/selector";
 
-type KidnapPostDependencies = {
-  getKidnapContextForUser: (userId: string) => Promise<KidnapContext | null>;
+type ReroutePostDependencies = {
+  getRerouteContextForUser: (userId: string) => Promise<RerouteContext | null>;
   now: () => Date;
   getUserIdFromRequest: (request: Request) => Promise<string | null>;
 };
 
-type KidnapRequestBody = {
+type RerouteRequestBody = {
   excludeSpotId?: string;
   rerollCount?: number;
 };
 
-async function resolveUserId(request: Request): Promise<string | null> {
-  const auth = request.headers.get("authorization");
-  if (auth) {
-    const [scheme, token] = auth.split(" ");
-    if (scheme === "Bearer" && token) {
-      return token;
-    }
-  }
-
+export async function resolveUserIdFromRequest(
+  _request: Request,
+  getUserId: () => Promise<string | null> = getAuthenticatedUserId,
+): Promise<string | null> {
   try {
-    return await getAuthenticatedUserId();
+    return await getUserId();
   } catch {
     return null;
   }
 }
 
-async function parseKidnapRequestBody(
+async function parseRerouteRequestBody(
   request: Request,
-): Promise<KidnapRequestBody> {
+): Promise<RerouteRequestBody> {
   try {
-    const body = (await request.json()) as KidnapRequestBody;
+    const body = (await request.json()) as RerouteRequestBody;
     return {
       excludeSpotId:
         typeof body?.excludeSpotId === "string" ? body.excludeSpotId : undefined,
@@ -48,8 +43,8 @@ async function parseKidnapRequestBody(
   }
 }
 
-export function createKidnapPostHandler(deps: KidnapPostDependencies) {
-  return async function kidnapPostHandler(request: Request): Promise<Response> {
+export function createReroutePostHandler(deps: ReroutePostDependencies) {
+  return async function reroutePostHandler(request: Request): Promise<Response> {
     const userId = await deps.getUserIdFromRequest(request);
 
     if (!userId) {
@@ -57,22 +52,23 @@ export function createKidnapPostHandler(deps: KidnapPostDependencies) {
     }
 
     try {
-      const body = await parseKidnapRequestBody(request);
+      const body = await parseRerouteRequestBody(request);
 
-      if ((body.rerollCount ?? 0) > 1) {
+      const rerollCount = body.rerollCount ?? 0;
+      if (!Number.isInteger(rerollCount) || rerollCount < 0 || rerollCount > 1) {
         return Response.json(
           { error: "Only one reroll is allowed per session" },
           { status: 400 },
         );
       }
 
-      const context = await deps.getKidnapContextForUser(userId);
+      const context = await deps.getRerouteContextForUser(userId);
 
       if (!context) {
         return Response.json({ error: "No eligible spots" }, { status: 404 });
       }
 
-      const result = selectKidnapSpot({
+      const result = selectRerouteSpot({
         ...context,
         now: deps.now(),
         excludedSpotIds: body.excludeSpotId ? [body.excludeSpotId] : undefined,
@@ -89,8 +85,8 @@ export function createKidnapPostHandler(deps: KidnapPostDependencies) {
   };
 }
 
-export const POST = createKidnapPostHandler({
-  getKidnapContextForUser,
+export const POST = createReroutePostHandler({
+  getRerouteContextForUser,
   now: () => new Date(),
-  getUserIdFromRequest: resolveUserId,
+  getUserIdFromRequest: resolveUserIdFromRequest,
 });

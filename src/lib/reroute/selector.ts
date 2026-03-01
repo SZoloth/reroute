@@ -26,7 +26,7 @@ export type Spot = {
   hours?: Partial<Record<Weekday, TimeWindow[]>>;
 };
 
-export type KidnapInput = {
+export type RerouteInput = {
   now: Date;
   user: {
     city: string;
@@ -40,7 +40,7 @@ export type KidnapInput = {
   rng?: () => number;
 };
 
-export function selectKidnapSpot(input: KidnapInput): { spot: Spot } | null {
+export function selectRerouteSpot(input: RerouteInput): { spot: Spot } | null {
   const thirtyDaysAgoMs = input.now.getTime() - 30 * 24 * 60 * 60 * 1000;
   const recentSpotIds = new Set(
     input.recentTrips
@@ -78,14 +78,14 @@ export function selectKidnapSpot(input: KidnapInput): { spot: Spot } | null {
 
   const rng = input.rng ?? Math.random;
   const totalWeight = candidates.reduce(
-    (sum, spot) => sum + Math.min(1 + spot.upvotes, 6),
+    (sum, spot) => sum + getSpotWeight(spot),
     0,
   );
   const roll = rng() * totalWeight;
 
   let cumulative = 0;
   for (const spot of candidates) {
-    cumulative += Math.min(1 + spot.upvotes, 6);
+    cumulative += getSpotWeight(spot);
     if (roll < cumulative) {
       return { spot };
     }
@@ -98,40 +98,65 @@ function isSpotOpenNow(spot: Spot, now: Date): boolean {
   if (!spot.hours) return true;
 
   const zone = spot.timezone ?? "UTC";
-  const weekday = new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    timeZone: zone,
-  })
-    .format(now)
-    .toLowerCase() as Weekday;
 
-  const windows = spot.hours[weekday];
-  if (!windows || windows.length === 0) return false;
+  try {
+    const weekday = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      timeZone: zone,
+    })
+      .format(now)
+      .toLowerCase() as Weekday;
 
-  const localTime = new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: zone,
-  }).format(now);
+    const windows = spot.hours[weekday];
+    if (!windows || windows.length === 0) return false;
 
-  const currentMinutes = toMinutes(localTime);
+    const localTime = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: zone,
+    }).format(now);
 
-  return windows.some((window) => {
-    const openMinutes = toMinutes(window.open);
-    const closeMinutes = toMinutes(window.close);
+    const currentMinutes = toMinutes(localTime);
+    if (currentMinutes == null) return false;
 
-    if (closeMinutes < openMinutes) {
-      return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
-    }
+    return windows.some((window) => {
+      const openMinutes = toMinutes(window.open);
+      const closeMinutes = toMinutes(window.close);
+      if (openMinutes == null || closeMinutes == null) return false;
 
-    return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
-  });
+      if (closeMinutes < openMinutes) {
+        return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
+      }
+
+      return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+    });
+  } catch {
+    return false;
+  }
 }
 
-function toMinutes(value: string): number {
-  const [hours, minutes] = value.split(":").map(Number);
+function toMinutes(value: string): number | null {
+  const [hoursRaw, minutesRaw] = value.split(":");
+  const hours = Number(hoursRaw);
+  const minutes = Number(minutesRaw);
+
+  if (
+    !Number.isInteger(hours) ||
+    !Number.isInteger(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null;
+  }
+
   return hours * 60 + minutes;
+}
+
+function getSpotWeight(spot: Spot): number {
+  return Math.max(1, Math.min(1 + spot.upvotes, 6));
 }
 
 function haversineMiles(

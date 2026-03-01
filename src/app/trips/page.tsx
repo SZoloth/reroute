@@ -37,7 +37,7 @@ export default async function TripsPage() {
   return (
     <main className="mx-auto w-full max-w-md px-6 py-10 text-zinc-100">
       <h1 className="text-3xl font-semibold">My Trips</h1>
-      <p className="mt-1 text-sm text-zinc-400">Kidnapped {trips.length} times</p>
+      <p className="mt-1 text-sm text-zinc-400">rerouted {trips.length} times</p>
 
       <div className="mt-6 space-y-3">
         {trips.map((trip) => (

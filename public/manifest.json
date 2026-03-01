@@ -1,6 +1,6 @@
 {
-  "name": "Kidnap",
-  "short_name": "Kidnap",
+  "name": "reroute",
+  "short_name": "reroute",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#050507",

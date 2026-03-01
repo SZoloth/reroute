@@ -14,7 +14,7 @@ test.describe("visual snapshots", () => {
   test("destination reveal tray", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
 
-    await page.route("**/api/kidnap", async (route) => {
+    await page.route("**/api/reroute", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -32,7 +32,7 @@ test.describe("visual snapshots", () => {
     });
 
     await page.goto("/");
-    await page.getByRole("button", { name: "Kidnap me" }).click();
+    await page.getByRole("button", { name: "reroute me" }).click();
     await expect(page.getByText("Denver Art Museum")).toBeVisible();
 
     await expect(page).toHaveScreenshot("home-reveal.png", {
