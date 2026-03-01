@@ -16,7 +16,7 @@ async function main() {
     throw new Error("ANTHROPIC_API_KEY is required");
   }
 
-  const prompt = `Generate 50 unique interesting spots in Denver, Colorado as JSON array only. Fields: name, description, category, latitude, longitude, hours, tags.`;
+  const prompt = `Generate 50 unique interesting spots in Denver, Colorado as JSON array only. Fields: name, description, category, latitude, longitude, hours, tags. For hours keys, use full weekday names exactly: sunday, monday, tuesday, wednesday, thursday, friday, saturday.`;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
