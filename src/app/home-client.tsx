@@ -25,6 +25,7 @@ export function HomeClient() {
   const [stage, setStage] = useState<Stage>("idle");
   const [spot, setSpot] = useState<SpotPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthError, setIsAuthError] = useState(false);
   const [rerollCount, setRerollCount] = useState(0);
 
   const isLoading = stage === "loading";
@@ -43,6 +44,7 @@ export function HomeClient() {
     if (!isReroll) setRerollCount(0);
 
     setError(null);
+    setIsAuthError(false);
     setStage("loading");
 
     const minDelay = new Promise((resolve) => setTimeout(resolve, shouldReduceMotion ? 0 : 900));
@@ -60,12 +62,13 @@ export function HomeClient() {
         minDelay,
       ]);
 
-      const payload = (await response.json()) as { error?: string; spot?: SpotPayload };
+      const payload = (await response.json()) as { error?: string; message?: string; spot?: SpotPayload };
 
       if (!response.ok || !payload.spot) {
         setSpot(null);
         setStage("idle");
-        setError(payload.error ?? "Couldn’t pick a destination right now.");
+        setIsAuthError(response.status === 401);
+        setError(payload.message ?? payload.error ?? "Couldn’t pick a destination right now.");
         return;
       }
 
@@ -154,13 +157,13 @@ export function HomeClient() {
                 className="mt-4 space-y-3 text-center"
               >
                 <p className="max-w-sm text-sm text-rose-300">{error}</p>
-                {error.includes("Unauthorized") && <SignInButton />}
+                {isAuthError && <SignInButton />}
               </motion.div>
             )}
           </AnimatePresence>
         </section>
 
-        <section aria-hidden={!isRevealed} className="fixed inset-x-0 bottom-0 z-20 px-3 pb-3">
+        <section aria-hidden={!isRevealed} className={`fixed inset-x-0 bottom-0 z-20 px-3 pb-3 ${isRevealed ? "pointer-events-auto" : "pointer-events-none"}`}>
           <motion.div
             className="rounded-3xl border border-zinc-100/10 bg-zinc-950/95 p-5 shadow-2xl backdrop-blur"
             initial={false}

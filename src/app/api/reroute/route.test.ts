@@ -15,7 +15,7 @@ describe("POST /api/reroute", () => {
     );
 
     expect(response.status).toBe(401);
-    await expect(response.json()).resolves.toEqual({ error: "Unauthorized" });
+    await expect(response.json()).resolves.toEqual({ error: "Unauthorized", message: "Sign in to get rerouted" });
   });
 
   it("returns 404 when user has no eligible reroute context", async () => {
@@ -30,7 +30,7 @@ describe("POST /api/reroute", () => {
     );
 
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: "No eligible spots" });
+    await expect(response.json()).resolves.toEqual({ error: "No eligible spots", message: "No adventures found nearby — check back soon!" });
   });
 
   it("returns selected spot when user is authorized and has eligible spots", async () => {

@@ -7,7 +7,7 @@ const tabs = [
   { href: "/", label: "Home" },
   { href: "/feed", label: "Feed" },
   { href: "/trips", label: "Trips" },
-  { href: "/settings", label: "Settings" },
+  { href: "/profile", label: "Profile" },
 ];
 
 export function BottomNav() {

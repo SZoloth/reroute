@@ -13,7 +13,12 @@ export default function OnboardingPage() {
   async function detectLocation() {
     setStatus("Detecting your location...");
     try {
-      const position = await getCurrentPosition();
+      const position = await Promise.race([
+        getCurrentPosition(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Location detection timed out")), 12000),
+        ),
+      ]);
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
       setHomeLatitude(lat);

@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { createClient } from "@/lib/supabase/server";
 
 import { ModerationList } from "./moderation-list";
@@ -26,7 +28,7 @@ export default async function AdminPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return <main className="px-6 py-10 text-zinc-100">Unauthorized</main>;
+    redirect("/");
   }
 
   const { data: profile } = await supabase
@@ -36,7 +38,7 @@ export default async function AdminPage() {
     .maybeSingle<{ is_admin: boolean }>();
 
   if (!profile?.is_admin) {
-    return <main className="px-6 py-10 text-zinc-100">Forbidden</main>;
+    redirect("/");
   }
 
   const { data: pendingSpots } = await supabase

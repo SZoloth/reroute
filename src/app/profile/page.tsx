@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { createClient } from "@/lib/supabase/server";
 
@@ -49,7 +51,10 @@ export default async function ProfilePage() {
         </ul>
       </section>
 
-      <div className="mt-8">
+      <div className="mt-8 flex items-center gap-4">
+        <Link href="/settings" className="text-sm text-zinc-400 hover:text-zinc-100">
+          Settings
+        </Link>
         <SignOutButton />
       </div>
     </main>

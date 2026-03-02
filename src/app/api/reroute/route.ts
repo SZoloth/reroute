@@ -48,7 +48,7 @@ export function createReroutePostHandler(deps: ReroutePostDependencies) {
     const userId = await deps.getUserIdFromRequest(request);
 
     if (!userId) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+      return Response.json({ error: "Unauthorized", message: "Sign in to get rerouted" }, { status: 401 });
     }
 
     try {
@@ -65,7 +65,7 @@ export function createReroutePostHandler(deps: ReroutePostDependencies) {
       const context = await deps.getRerouteContextForUser(userId);
 
       if (!context) {
-        return Response.json({ error: "No eligible spots" }, { status: 404 });
+        return Response.json({ error: "No eligible spots", message: "No adventures found nearby — check back soon!" }, { status: 404 });
       }
 
       const result = selectRerouteSpot({
@@ -75,7 +75,7 @@ export function createReroutePostHandler(deps: ReroutePostDependencies) {
       });
 
       if (!result) {
-        return Response.json({ error: "No eligible spots" }, { status: 404 });
+        return Response.json({ error: "No eligible spots", message: "No adventures found nearby — check back soon!" }, { status: 404 });
       }
 
       return Response.json({ spot: result.spot }, { status: 200 });

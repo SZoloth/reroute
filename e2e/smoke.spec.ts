@@ -57,10 +57,84 @@ test("reroute reveal and ride-click smoke", async ({ page }) => {
   await expect.poll(() => tripCalls).toBe(1);
 });
 
+test("ISSUE-002: error message is clickable after reroute failure", async ({ page }) => {
+  await page.route("**/api/reroute", async (route) => {
+    await route.fulfill({
+      status: 401,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "Unauthorized", message: "Sign in to get rerouted" }),
+    });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "reroute me" }).click();
+
+  const errorText = page.getByText("Sign in to get rerouted");
+  await expect(errorText).toBeVisible();
+
+  // Verify no fixed element with pointer-events blocks the error area
+  const blockingElements = await page.evaluate(() => {
+    const errorEl = document.querySelector('[aria-hidden="true"]');
+    if (!errorEl) return false;
+    const style = window.getComputedStyle(errorEl);
+    return style.pointerEvents === "auto";
+  });
+  expect(blockingElements).toBe(false);
+});
+
+test("ISSUE-001: 401 shows friendly message and sign-in button", async ({ page }) => {
+  await page.route("**/api/reroute", async (route) => {
+    await route.fulfill({
+      status: 401,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "Unauthorized", message: "Sign in to get rerouted" }),
+    });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "reroute me" }).click();
+
+  await expect(page.getByText("Sign in to get rerouted")).toBeVisible();
+  // Should not show raw "Unauthorized"
+  await expect(page.getByText("Unauthorized", { exact: true })).not.toBeVisible();
+});
+
+test("ISSUE-003: 404 shows friendly empty state", async ({ page }) => {
+  await page.route("**/api/reroute", async (route) => {
+    await route.fulfill({
+      status: 404,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "No eligible spots", message: "No adventures found nearby — check back soon!" }),
+    });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "reroute me" }).click();
+
+  await expect(page.getByText("No adventures found nearby")).toBeVisible();
+  // Should not show raw "No eligible spots"
+  await expect(page.getByText("No eligible spots", { exact: true })).not.toBeVisible();
+});
+
 test("protected pages redirect unauthenticated users", async ({ page }) => {
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/$/);
 
   await page.goto("/submit");
   await expect(page).toHaveURL(/\/$/);
+});
+
+test("ISSUE-006: admin page redirects unauthenticated users", async ({ page }) => {
+  await page.goto("/admin");
+  await expect(page).toHaveURL(/\/$/);
+  // Should not show raw "Forbidden" or "Unauthorized"
+  await expect(page.getByText("Forbidden")).not.toBeVisible();
+  await expect(page.getByText("Unauthorized")).not.toBeVisible();
+});
+
+test("ISSUE-007: bottom nav contains profile link", async ({ page }) => {
+  await page.goto("/");
+  const profileLink = page.getByRole("link", { name: "Profile" });
+  await expect(profileLink).toBeVisible();
+  await expect(profileLink).toHaveAttribute("href", "/profile");
 });
