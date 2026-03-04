@@ -1,3 +1,7 @@
 ignoredBuiltDependencies:
+  - agent-browser
+  - edgedriver
+  - esbuild
+  - geckodriver
   - sharp
   - unrs-resolver
