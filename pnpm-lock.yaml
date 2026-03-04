@@ -46,8 +46,8 @@ importers:
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
       agent-browser:
-        specifier: ^0.15.1
-        version: 0.15.1
+        specifier: ^0.16.1
+        version: 0.16.1
       eslint:
         specifier: ^9
         version: 9.39.3(jiti@2.6.1)
@@ -1187,8 +1187,8 @@ packages:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
 
-  agent-browser@0.15.1:
-    resolution: {integrity: sha512-4lWlNLBehYaNvJQlLNZ/jXxRwNczeXvJVdH4koK5bAJNLJ0FqutkH+3Tmc8qvhPFn9D7I53Fe6GKZ6iWJDEA0Q==}
+  agent-browser@0.16.1:
+    resolution: {integrity: sha512-AxL0IB3n/Ov83cJB7tdPRd8HKDR9dRtVgV80QfLaHuH8c4a+0cSC2p4bTsRQybZrbXcV1CbMthIjkk7PlAh3Zg==}
     hasBin: true
 
   ajv@6.14.0:
@@ -4314,7 +4314,7 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  agent-browser@0.15.1:
+  agent-browser@0.16.1:
     dependencies:
       node-simctl: 7.7.5
       playwright-core: 1.58.2
