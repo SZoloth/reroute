@@ -65,3 +65,14 @@ pnpm test
 ```
 
 Both should pass before promoting.
+
+## 5) Admin flag (`005_protect_profile_admin_flag.sql`)
+
+After `supabase db push`, the verification SQL should list trigger
+`profiles_protect_admin_flag` on `public.profiles`. API roles (`authenticated`,
+`anon`) can no longer set or change `profiles.is_admin`. Grant or revoke admin
+from the SQL editor:
+
+```sql
+update public.profiles set is_admin = true where email = '<admin email>';
+```
