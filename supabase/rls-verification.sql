@@ -25,3 +25,10 @@ from information_schema.triggers
 where event_object_schema = 'public'
   and event_object_table = 'profiles'
   and trigger_name = 'profiles_sync_public_profile';
+
+-- ensure the admin-flag guard exists on profiles (migration 005)
+select trigger_name, event_object_table, action_timing, event_manipulation
+from information_schema.triggers
+where event_object_schema = 'public'
+  and event_object_table = 'profiles'
+  and trigger_name = 'profiles_protect_admin_flag';
